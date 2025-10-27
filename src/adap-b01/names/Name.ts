@@ -21,10 +21,8 @@ export class Name {
     /** Expects that all Name components are properly masked */
     // @methodtype initialization-method
     constructor(other: string[], delimiter?: string) {
-        this.components = other;
-        if (delimiter) {
-            this.delimiter = delimiter;
-        }
+        this.components = other.slice();
+        this.delimiter = delimiter ?? DEFAULT_DELIMITER;
     }
 
     /**
@@ -34,7 +32,9 @@ export class Name {
      */
     // @methodtype conversion-method
     public asString(delimiter: string = this.delimiter): string {
-        return this.components.join(delimiter);
+        return this.components
+        .map(comp => this.unmaskComponent(comp, delimiter))
+        .join(delimiter);
     }
 
     /** 
@@ -49,36 +49,65 @@ export class Name {
 
     // @methodtype get-method
     public getComponent(i: number): string {
+        if (i < 0 || i >= this.getNoComponents()) {
+            throw new Error("Component index out of bounds");
+        }
         return this.components[i];
     }
 
     /** Expects that new Name component c is properly masked */
     // @methodtype set-method
     public setComponent(i: number, c: string): void {
+        if (i < 0 || i >= this.getNoComponents()) {
+            throw new Error("Component index out of bounds");
+        }   
         this.components[i] = c;
     }
 
      /** Returns number of components in Name instance */
-     // TODO methodtype get-method ????
+     // @methodtype get-method
      public getNoComponents(): number {
         return this.components.length;
     }
 
     /** Expects that new Name component c is properly masked */
-    // TODO @methodtype command-mehod ??????
+    // @methodtype mutation-mehod
     public insert(i: number, c: string): void {
-       this.components.splice(i, 0, c);
+        if (i < 0 || i > this.getNoComponents()) {
+            throw new Error("Insert index out of bounds");
+        }
+        this.components.splice(i, 0, c);
     }
 
     /** Expects that new Name component c is properly masked */
-    // TODO @methodtype command-method ??????
+    // @methodtype mutation-method 
     public append(c: string): void {
         this.components.push(c);
     }
 
-    // TODO @methodtype command-method ??????
+    // @methodtype mutation-method
     public remove(i: number): void {
+        if (i < 0 || i >= this.getNoComponents()) {
+            throw new Error("Remove index out of bounds");
+        }
         this.components.splice(i, 1);
+    }
+
+    // @methodtype: helper-method
+    private unmaskComponent(maskedString: string, delimiter: string): string {
+        let unescaped = '';
+        let escaped = false;
+        for (const ch of maskedString) {
+            if (escaped) {
+                unescaped += ch;
+                escaped = false;
+            } else if (ch === ESCAPE_CHARACTER) {
+                escaped = true;
+            } else {
+                unescaped += ch;
+            }
+        }
+        return unescaped;
     }
 
 }
