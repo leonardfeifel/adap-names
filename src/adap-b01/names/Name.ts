@@ -47,6 +47,7 @@ export class Name {
         return this.components.join(DEFAULT_DELIMITER);
     }
 
+    /** Returns properly masked component string */
     // @methodtype get-method
     public getComponent(i: number): string {
         if (i < 0 || i >= this.getNoComponents()) {
