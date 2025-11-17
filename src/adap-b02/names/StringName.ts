@@ -10,15 +10,15 @@ export class StringName implements Name {
     constructor(source: string, delimiter?: string) {
         this.name = source;
         this.delimiter = delimiter ?? DEFAULT_DELIMITER;
-        this.noComponents = source.split(this.delimiter).length;
+        this.noComponents = this.splitEscaped(source, this.delimiter, true).length;
     }
 
     public asString(delimiter: string = this.delimiter): string {
-        return this.name.split(this.delimiter).join(delimiter); // missing unmasking?
+        return this.splitEscaped(this.name, this.delimiter).join(delimiter);
     }
 
     public asDataString(): string {
-        return this.name;
+        return this.splitEscaped(this.name, this.delimiter, true).join(DEFAULT_DELIMITER);
     }
 
     public getDelimiterCharacter(): string {
@@ -37,21 +37,21 @@ export class StringName implements Name {
         if (x < 0 || x >= this.noComponents) {
             throw new Error("Component index out of bounds");
         }
-        return this.name.split(this.delimiter)[x];
+        return this.splitEscaped(this.name, this.delimiter, true)[x];
     }
 
     public setComponent(n: number, c: string): void {
         if (n < 0 || n >= this.noComponents) {
             throw new Error("Component index out of bounds");
         }
-        this.name = this.name.split(this.delimiter).map((comp, index) => index === n ? c : comp).join(this.delimiter);
+        this.name = this.splitEscaped(this. name, this.delimiter, true).map((comp, index) => index === n ? c : comp).join(this.delimiter);
     }
 
     public insert(n: number, c: string): void {
         if (n < 0 || n >= this.noComponents) {
             throw new Error("Component index out of bounds");
         }
-        let nameArray = this.name.split(this.delimiter);
+        let nameArray = this.splitEscaped(this.name,this.delimiter,true);
         nameArray.splice(n, 0, c);
         this.name = nameArray.join(this.delimiter);
         this.noComponents++;
@@ -66,7 +66,7 @@ export class StringName implements Name {
         if (n < 0 || n >= this.noComponents) {
             throw new Error("Component index out of bounds");
         }
-        let nameArray = this.name.split(this.delimiter);
+        let nameArray = this.splitEscaped(this.name, this.delimiter, true);
         nameArray.splice(n, 1);
         this.name = nameArray.join(this.delimiter);
         this.noComponents--;
@@ -78,6 +78,31 @@ export class StringName implements Name {
         }
         this.name += this.delimiter + other.asDataString();
         this.noComponents += other.getNoComponents();
+    }
+
+    private splitEscaped(input:string, delimiter: string, withEscapeChar : boolean = false): string[] {
+        const result: string[] = [];
+        let current = '';
+        let escaped = false;
+        for (let i = 0; i < input.length; i++) {
+            const char = input[i];
+            if(escaped) {
+                current +=char;
+                escaped = false;
+            } else if(char === ESCAPE_CHARACTER) {
+                escaped = true;
+                if(withEscapeChar) {
+                    current += char;
+                }
+            } else if(char === delimiter) {
+                result.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        result.push(current);
+        return result;
     }
 
 }
