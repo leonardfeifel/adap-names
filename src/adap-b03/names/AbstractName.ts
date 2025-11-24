@@ -9,9 +9,6 @@ export abstract class AbstractName implements Name {
         if (delimiter)
             this.delimiter = delimiter;
     }
-    abstract clone(): Name;
-
-    abstract asString(delimiter?: string): string;
 
     public toString(): string {
         return this.asString();
@@ -57,6 +54,16 @@ export abstract class AbstractName implements Name {
     public getDelimiterCharacter(): string {
         return this.delimiter;
     }
+    
+    public concat(other: Name): void {
+        for (let i = 0; i < other.getNoComponents(); i++) {
+            this.append(other.getComponent(i));
+        }
+    }
+
+    abstract clone(): Name;
+
+    abstract asString(delimiter?: string): string;
 
     abstract getNoComponents(): number;
 
@@ -66,11 +73,5 @@ export abstract class AbstractName implements Name {
     abstract insert(i: number, c: string): void;
     abstract append(c: string): void;
     abstract remove(i: number): void;
-
-    public concat(other: Name): void {
-        for (let i = 0; i < other.getNoComponents(); i++) {
-            this.append(other.getComponent(i));
-        }
-    }
 
 }
