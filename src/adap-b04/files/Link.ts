@@ -1,5 +1,6 @@
 import { Node } from "./Node";
 import { Directory } from "./Directory";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
 
 export class Link extends Node {
 
@@ -18,6 +19,7 @@ export class Link extends Node {
     }
 
     public setTargetNode(target: Node): void {
+        this.assertArgumentNotNull(target, "Target node cannot be null");
         this.targetNode = target;
     }
 
@@ -34,5 +36,10 @@ export class Link extends Node {
     protected ensureTargetNode(target: Node | null): Node {
         const result: Node = this.targetNode as Node;
         return result;
+    }
+
+    protected assertArgumentNotNull(argument: any, message: string): void {
+        const condition: boolean = (argument !== null && argument !== undefined);
+        IllegalArgumentException.assert(condition, message);
     }
 }
