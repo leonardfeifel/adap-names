@@ -1,6 +1,6 @@
 import { Node } from "./Node";
 import { Directory } from "./Directory";
-import { MethodFailedException } from "../common/MethodFailedException";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
 
 
 enum FileState {
@@ -43,17 +43,17 @@ export class File extends Node {
     // --- Assertions ---
     protected assertIsNotOpen(): void {
         const condition: boolean = (this.state !== FileState.OPEN);
-        MethodFailedException.assert(condition, "File is already open");
+        IllegalArgumentException.assert(condition, "File is already open");
     }
     
     protected assertIsNotDeleted(): void {
         const condition: boolean = (this.state !== FileState.DELETED);
-        MethodFailedException.assert(condition, "File is deleted");
+        IllegalArgumentException.assert(condition, "File is deleted");
     }
 
     protected assertIsOpen(): void {
         const condition: boolean = (this.state === FileState.OPEN);
-        MethodFailedException.assert(condition, "File must be open to perform this operation");
+        IllegalArgumentException.assert(condition, "File must be open to perform this operation");
     }
 
 }

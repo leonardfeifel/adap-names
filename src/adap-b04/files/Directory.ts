@@ -1,4 +1,3 @@
-import { MethodFailedException } from "../common/MethodFailedException";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { Node } from "./Node";
 
@@ -28,7 +27,7 @@ export class Directory extends Node {
     // --- Assertions ---
     protected assertHasChildNode(cn: Node): void {
         const condition: boolean = this.childNodes.has(cn);
-        MethodFailedException.assert(condition, "Directory does not contain the specified child node");
+        IllegalArgumentException.assert(condition, "Directory does not contain the specified child node");
     }
 
     protected assertArgumentNotNull(argument: any, message: string): void {

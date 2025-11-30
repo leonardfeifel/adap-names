@@ -54,7 +54,7 @@ export class Node {
     }
 
     protected assertIsValidBaseName(bn: string): void {
-        const condition: boolean = (bn !== null && bn !== undefined && bn.length > 0);
+        const condition: boolean = (bn !== null && bn !== undefined && bn.includes('/') === false);
         IllegalArgumentException.assert(condition, "Base name is not valid");
     }
     

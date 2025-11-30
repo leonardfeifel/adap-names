@@ -34,6 +34,7 @@ export class Link extends Node {
     }
 
     protected ensureTargetNode(target: Node | null): Node {
+        this.assertArgumentNotNull(target, "Target node is not set");
         const result: Node = this.targetNode as Node;
         return result;
     }

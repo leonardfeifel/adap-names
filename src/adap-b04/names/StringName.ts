@@ -1,6 +1,7 @@
 import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
 import { AbstractName } from "./AbstractName";
+import { InvalidStateException } from "../common/InvalidStateException";
 
 export class StringName extends AbstractName {
 
@@ -8,64 +9,107 @@ export class StringName extends AbstractName {
     protected noComponents: number = 0;
 
     constructor(source: string, delimiter?: string) {
-        super();
-        throw new Error("needs implementation or deletion");
+        super(delimiter);
+        this.name = source;
+        this.noComponents = this.splitEscaped(source, this.delimiter, true).length;
     }
 
     public clone(): Name {
-        throw new Error("needs implementation or deletion");
+        return new StringName(this.name, this.delimiter);
     }
 
     public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getHashCode(): number {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
+        return this.splitEscaped(this.name, this.delimiter).join(delimiter);
     }
 
     public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
+        return this.noComponents;
     }
 
     public getComponent(i: number): string {
-        throw new Error("needs implementation or deletion");
+        this.assertIndexInBounds(i);
+        return this.splitEscaped(this.name, this.delimiter, true)[i];
     }
 
     public setComponent(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertIndexInBounds(i);
+        this.assertNotNullOrUndefined(c, "Component cannot be null or undefined");
+        this.name = this.splitEscaped(this.name, this.delimiter, true).map((comp, index) => index === i ? c : comp).join(this.delimiter);
+        this.assertInvariant();
+        this.assertComponentAtIndexChanged(i, c);
     }
 
     public insert(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertIndexInInsertBounds(i);
+        this.assertNotNullOrUndefined(c, "Component cannot be null or undefined");
+
+        const oldLength: number = this.getNoComponents();
+        let nameArray = this.splitEscaped(this.name, this.delimiter, true);
+        nameArray.splice(i, 0, c);
+        this.name = nameArray.join(this.delimiter);
+        this.noComponents++;
+
+        this.assertInvariant();
+        this.assertLengthChanged(oldLength, 1);
+        this.assertComponentAtIndexChanged(i, c);
     }
 
     public append(c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertNotNullOrUndefined(c, "Component cannot be null or undefined");
+        const oldLength: number = this.getNoComponents();
+
+        let nameArray = this.splitEscaped(this.name, this.delimiter, true);
+        nameArray.push(c);
+        this.name = nameArray.join(this.delimiter);
+        
+        this.noComponents++;
+
+        this.assertInvariant();
+        this.assertLengthChanged(oldLength, 1);
     }
 
     public remove(i: number) {
-        throw new Error("needs implementation or deletion");
+        this.assertIndexInBounds(i);
+        const oldLength: number = this.getNoComponents();
+
+        let nameArray = this.splitEscaped(this.name, this.delimiter, true);
+        nameArray.splice(i, 1);
+        this.name = nameArray.join(this.delimiter);
+        this.noComponents--;
+
+        this.assertInvariant();
+        this.assertLengthChanged(oldLength, -1);
     }
 
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
+
+    private splitEscaped(input: string, delimiter: string, withEscapeChar: boolean = false): string[] {
+        const result: string[] = [];
+        let current = '';
+        let escaped = false;
+        for (let i = 0; i < input.length; i++) {
+            const char = input[i];
+            if (escaped) {
+                current += char;
+                escaped = false;
+            } else if (char === ESCAPE_CHARACTER) {
+                escaped = true;
+                if (withEscapeChar) {
+                    current += char;
+                }
+            } else if (char === delimiter) {
+                result.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        result.push(current);
+        return result;
+    }
+
+    protected assertInvariant(): void {
+        const condition: boolean = (this.name !== null && this.name !== undefined);
+        InvalidStateException.assert(condition, "Invariant violation: name string is null or undefined");
     }
 
 }
